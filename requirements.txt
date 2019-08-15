@@ -2,3 +2,4 @@ Flask
 Flask-SQLAlchemy
 marshmallow
 pyjwt
+gunicorn
