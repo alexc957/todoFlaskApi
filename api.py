@@ -41,6 +41,7 @@ class User(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     public_id = db.Column(db.String(50),unique=True)
     name = db.Column(db.String(50))
+    email = db.Column(db.String(30))
     password = db.Column(db.String(80))
     admin = db.Column(db.Boolean)
 
@@ -53,7 +54,7 @@ class Todo(db.Model):
 # User schema 
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('public_id','name','password','admin') 
+        fields = ('public_id','email','name','password','admin') 
 
 user_schema = UserSchema(strict=True)
 users_schema = UserSchema(many=True,strict=True)
@@ -82,6 +83,7 @@ def create_user():
     hashed_password = generate_password_hash(data.get('password'),method='sha256')
     new_user = User(public_id=str(uuid.uuid4()),
                     name=data.get('name'),
+                    email = data.get('email'),
                     password=hashed_password,
                     admin=False)
     
