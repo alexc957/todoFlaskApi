@@ -1,57 +1,12 @@
-from flask import Flask, jsonify, request, make_response
-from flask_sqlalchemy import SQLAlchemy
+from flaskTodoAPi import app, ma, db
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
-import os 
-from flask_marshmallow import Marshmallow 
 import jwt 
 import datetime
-from flask_cors import CORS
+from flask import jsonify, request, make_response
+from flaskTodoAPi.models import User
 
 
-app = Flask(__name__)
-CORS(app, resources='/api/*')
-basedir = os.path.abspath(os.path.dirname(__file__)) 
-app.config['SECRET_KEY']='secretkey'
-app.config['SQLALCHEMY_DATABASE_URI'] =  'sqlite:///'+os.path.join(basedir,'vueAppDB.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-ma = Marshmallow(app) 
-
-
-#def token_required(f):
-#    @wraps(f)
-#    def decorated(*args,**kwargs):
-#        token = None
-#        if 'x-access-token' in requests.headers:
-#            token = request.headers['x-access-token']
-#        if not token:
-#           return jsonify({'message': 'Token is missing'}),401
-#        try:
-#            data = jwt.decode(token,app.config['SECRET_KEY'])
-#            current_user = User.query.filter_by(public_id=data['public_id']).first()
-#        except:
-#            return jsonify({'message':'Invalid Token'}), 401
-#
-#        return f(current_user,*args,**kwargs)
-#    return decorated
-
-class User(db.Model):
-    id = db.Column(db.Integer,primary_key=True)
-    public_id = db.Column(db.String(50),unique=True)
-    name = db.Column(db.String(50))
-    email = db.Column(db.String(30))
-    password = db.Column(db.String(80))
-    admin = db.Column(db.Boolean)
-
-class Todo(db.Model):
-    id = db.Column(db.Integer,primary_key=True)
-    text = db.Column(db.String(50))
-    complete = db.Column(db.Boolean)
-    user_id = db.Column(db.Integer)   
-    
-# User schema 
 class UserSchema(ma.Schema):
     class Meta:
         fields = ('public_id','email','name','password','admin') 
@@ -124,7 +79,3 @@ def login():
         token = jwt.encode({'public_id': user.public_id,'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},app.config['SECRET_KEY'],algorithm='HS256')
         return jsonify({'token' : token.decode('UTF-8')})
     return make_response('Could not verify',401,{'WWW-Authenticate':'Basic realm="Login requiered"'})
-
-if __name__=="__main__":
-    print("hola")
-    app.run(debug=True)
