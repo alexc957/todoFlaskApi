@@ -66,16 +66,17 @@ def delete_user(public_id):
     db.session.commit()
     return jsonify({'message':'user has been deleted'})
 
-@app.route('/login')
+@app.route('/api/login',methods=['POST'])
 def login():
-    auth = request.authorization 
-    if not auth or not auth.username or not auth.password:
-        return make_response('Could not verify',401,{'WWW-Authenticate':'Basic realm="Login requiered"'})
+    data = request.get_json()
 
-    user = User.query.filter_by(name=auth.username).first()
-    if not user:
-        return make_response('Could not verify',401,{'WWW-Authenticate':'Basic realm="Login requiered"'})
-    if check_password_hash(user.password,auth.password):
-        token = jwt.encode({'public_id': user.public_id,'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},app.config['SECRET_KEY'],algorithm='HS256')
+    if not data or not data.get('email') or not data.get('password'):
+        return jsonify({"message":"Could no verify", "error":"true"})
+
+    user = User.query.filter_by(email=data.get('email')).first()
+    if not user:           
+        return jsonify({"message":"Bad credentials", "error":"true"})
+    if check_password_hash(user.password,data.get('password')):
+        token = jwt.encode({'public_id': user.public_id,'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=60)},app.config['SECRET_KEY'],algorithm='HS256')
         return jsonify({'token' : token.decode('UTF-8')})
-    return make_response('Could not verify',401,{'WWW-Authenticate':'Basic realm="Login requiered"'})
+    return jsonify({"message":"Bad credentials", "error":"true"})
