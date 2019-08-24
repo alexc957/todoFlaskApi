@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import jwt 
 import datetime
 from flask import jsonify, request, make_response
-from flaskTodoAPi.models import User
+from flaskTodoAPi.models import User,Task, Tag
 
 
 class UserSchema(ma.Schema):
@@ -20,6 +20,12 @@ class TaskSchema(ma.Schema):
         fields = ('title','text','start_time','due_date','complete')
 task_schema = TaskSchema(strict=True)
 tasks_schema = TaskSchema(many=True,strict=True)
+
+class TagSchema(ma.Schema):
+    class Meta:
+        fields = ['name']
+
+tags_schema = TagSchema(many=True,strict=True)
 
 @app.route('/api/user',methods=['GET'])
 def get_all_users():
@@ -89,14 +95,52 @@ def verify_token():
         return jsonify({'tokenValid': False})
     #return jsonify({'tokenValid': False})
 
-# tasks 
-@app.route('/api/task/<public_id>',methods=['GET'])
-def tasks(public_id):
+def get_tags_as_list_of_objects(tags_names):
+    tags_objects = []
+    for tag_name in tags_names:
+        tag_db = Tag.query.filter_by(name=tag_name).first()
+        if not tag_db:
+            tag_db = Tag(name=tag_name)
+        tags_objects.append(tag_db)
+    return tags_objects
+
+
+#tasks
+@app.route('/api/task',methods=['POST'])
+def create_task():
+    data = request.get_json()
+    public_id = data.get('publicId')
+    tags = data.get('tags')
+    title= data.get('title')
+    text = data.get('description')
+    start_date = data.get('startDate').split('-')
+    due_date = data.get('dueDate').split('-')
+    status = data.get('status')
+
+    start_date = datetime.datetime(int(start_date[0]),int(start_date[1]),int(start_date[2]))
+    due_date = datetime.datetime(int(due_date[0]),int(due_date[1]),int(due_date[2]))
+        
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({"message":"No user found","error":True})
-    result = tasks_schema.dump(user.taks)
-    
+        return jsonify({'Message': 'User not found','error':True})
+    task = Task(title=title,text=text,start_date=start_date,due_date=due_date,status=status)
+    user.tasks.append(task)
+
+    tags_objects = get_tags_as_list_of_objects(tags)
+    print(tags_objects)
+    for tag in tags_objects:
+        task.tags.append(tag)
+    db.session.add(task)
+    db.session.commit()
+    return jsonify({'Message': 'Task created','error':False})
+
+
+# tags 
+@app.route('/api/tag',methods=['GET'])
+def get_tags():
+    all_tags = Tag.query.all()
+    result = tags_schema.dump(all_tags)
+    return jsonify(result.data)
 
 
 
