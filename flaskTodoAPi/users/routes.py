@@ -6,6 +6,7 @@ from flaskTodoAPi.models import User
 from flaskTodoAPi.schemas import UserSchema
 from werkzeug.security import generate_password_hash, check_password_hash
 from flaskTodoAPi import app
+import uuid
 
 users = Blueprint('users',__name__)
 user_schema = UserSchema(strict=True)
@@ -18,7 +19,7 @@ def get_all_users():
 
     return jsonify(result.data)
 
-@users.route('/api/users/user//<public_id>',methods=['GET'])
+@users.route('/api/users/user/<public_id>',methods=['GET'])
 def get_one_user(public_id):
     user =  User.query.filter_by(public_id=public_id).first()
     if not user:
@@ -27,7 +28,10 @@ def get_one_user(public_id):
 
 @users.route('/api/users/user',methods=['POST'])
 def create_user():
+    
     data = request.get_json()
+    print("hello there")
+    print(f'data? {data}')
     user = User.query.filter_by(email=data.get('email')).first()
     if user:
         return jsonify({'message':'Email already taken','error': True})
@@ -42,18 +46,18 @@ def create_user():
     db.session.commit()
     return jsonify({'message':'new user Created','error': False}) 
 
-@users.route('/api/users/user/<public_id>',methods=['PUT'])
-def promote_user(public_id):
-    user =  User.query.filter_by(public_id=public_id).first()
+@users.route('/api/users/user/<email>',methods=['PUT'])
+def promote_user(email):
+    user =  User.query.filter_by(email=email).first()
     if not user:
         return jsonify({"message":"No user found"})
     user.admin = True
     db.session.commit()
     return jsonify({"message":"The user has been promoted"})
 
-@users.route('/api/users/user/<public_id>',methods=['DELETE'])
-def delete_user(public_id):
-    user =  User.query.filter_by(public_id=public_id).first()
+@users.route('/api/users/user/<email>',methods=['DELETE'])
+def delete_user(email):
+    user =  User.query.filter_by(email = email).first()
     if not user:
         return jsonify({"message":"No user found"})
     db.session.delete(user)
