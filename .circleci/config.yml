@@ -8,8 +8,8 @@ jobs:
       - run:
           command: |
             python3 -m venv flaskVenv
-            source flaskVenv/bin/activate
-            ls
+            . flaskVenv/bin/activate
+            ls            
             pip3 install -r requirements.txt
       - run:
           command: |
