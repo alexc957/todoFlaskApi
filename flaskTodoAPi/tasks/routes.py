@@ -34,7 +34,7 @@ def create_task():
         
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({'Message': 'User not found','error':True})
+        return jsonify({'message': 'User not found','error':True})
     task = Task(title=title,text=text,start_date=start_date,due_date=due_date,status=status)
     user.tasks.append(task)
 
@@ -58,3 +58,17 @@ def get_tasks(public_id):
         })
     result = tasks_schema.dump(user.tasks)
     return jsonify({'tasks': result.data, 'error' : False})
+
+
+@tasks.route('/api/tasks/task/<id>',methods= ['DELETE'])
+def delete_task(id):
+    task = Task.query.filter_by(id=id).first()
+    print(task)
+    if not task:
+        return jsonify({"message":"task not found", "error": True})
+    db.session.delete(task)
+    db.session.commit()
+    return jsonify({"message":"task deleted", "error": False})
+
+
+

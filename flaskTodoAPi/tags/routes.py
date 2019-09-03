@@ -11,3 +11,4 @@ def get_tags():
     all_tags = Tag.query.all()
     result = tags_schema.dump(all_tags)
     return jsonify(result.data)
+    
