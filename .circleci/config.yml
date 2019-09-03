@@ -9,11 +9,9 @@ jobs:
       - run:
           command: |
             python3 -m venv flaskVenv
-            . flaskVenv/bin/activate 
-            ls ~/todoFlaskApi >> prueba.txt
-            cat prueba.txt     
+            . flaskVenv/bin/activate   
             pip3 install -r ~/todoFlaskApi/requirements.txt
       - run:
           command: |
             . flaskVenv/bin/activate
-            pytest            
+            pytest       
