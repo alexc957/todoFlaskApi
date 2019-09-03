@@ -9,7 +9,7 @@ jobs:
           command: |
             python3 -m venv flaskVenv
             source flaskVenv/bin/activate
-            pip install -r ~/todoFlaskApi/requirements.txt
+            pip3 install -r requirements.txt
       - run:
           command: |
             pytest            
