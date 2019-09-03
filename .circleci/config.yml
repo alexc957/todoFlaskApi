@@ -2,3 +2,15 @@ version: 2
 jobs:
   build:
     working_directory: ~/todoFlaskApi
+    docker:
+      - image: circleci/python:3.6.4
+    steps:
+      - run:
+          command: |
+            python3 -m venv flaskVenv
+            source flaskVenv/bin/activate
+            pip install -r requirements.txt
+      - run:
+          command: |
+          pytest 
+            
