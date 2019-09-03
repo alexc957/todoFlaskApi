@@ -8,8 +8,7 @@ jobs:
       - run:
           command: |
             python3 -m venv flaskVenv
-            . flaskVenv/bin/activate
-           # cd ~/todoFlaskApi                
+            . flaskVenv/bin/activate           
             pip3 install -r ~/todoFlaskApi/requirements.txt
       - run:
           command: |
