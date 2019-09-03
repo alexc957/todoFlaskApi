@@ -9,3 +9,4 @@ PyJWT==1.7.1
 gunicorn
 Flask-Migrate
 pytest
+
