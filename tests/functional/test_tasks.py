@@ -31,6 +31,28 @@ def test_create_task(test_client):
     assert data.get('message') == 'Task created'
     assert not data.get('error')
 
+def test_update_task(test_client):
+    user = User.query.filter_by(email="prueba@gmail.com").first()
+    last_task = user.tasks.pop()
+    task_data_updated = {
+        "id": last_task.id,
+        "tags": ["Javascript","Vue","Todo", "VueJs" , "Django"],
+        "title": "Test title",
+        "description" : "Test description",
+        "startDate": "2019-08-29",
+        "dueDate": "2019-10-29",
+        "status" : "Done"
+    }
+
+    response = test_client.put('/api/tasks/task',
+                                data = json.dumps(task_data_updated),
+                                content_type='application/json')
+    data = response.get_json()
+    assert data.get('message') == 'Task updated!'
+    assert not data.get('error')
+
+
+
 def test_create_task_with_invalid_public_id(test_client):
     task_data = {
         "publicId" : "857597ad-e02ddddddddd2",
