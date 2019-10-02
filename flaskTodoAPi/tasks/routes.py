@@ -46,6 +46,32 @@ def create_task():
     db.session.commit()
     return jsonify({'message': 'Task created','error':False})
 
+@tasks.route('/api/tasks/task',methods=['PUT'])
+def update_task():
+    data = request.get_json()
+    task_id = data.get('id')
+    task = Task.query.filter_by(id=task_id).first()
+    if not task:
+         return jsonify({"message": "Task not found", "error": True})
+    task.tags = []
+    tags = data.get('tags')
+    task.title= data.get('title')
+    task.text = data.get('description')
+    start_date = data.get('startDate').split('-')
+    due_date = data.get('dueDate').split('-')
+    task.status = data.get('status')
+
+    task.start_date = datetime.datetime(int(start_date[0]),int(start_date[1]),int(start_date[2]))
+    task.due_date = datetime.datetime(int(due_date[0]),int(due_date[1]),int(due_date[2]))
+
+    tags_objects = get_tags_as_list_of_objects(tags)
+    for tag in tags_objects:
+        task.tags.append(tag)
+    db.session.commit()
+    return jsonify({"message": "Task updated!","error": False})
+
+
+
 
 @tasks.route('/api/tasks/task/<public_id>',methods=['GET'])
 def get_tasks(public_id):
